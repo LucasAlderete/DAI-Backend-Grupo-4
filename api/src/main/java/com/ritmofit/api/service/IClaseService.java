@@ -5,9 +5,9 @@ import com.ritmofit.api.dto.ClaseDetalleDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public interface IClaseService {
-    Page<ClaseDTO> getClases(Long sedeId, Long disciplinaId, LocalDateTime fecha, Pageable pageable);
+    Page<ClaseDTO> getClases(Long sedeId, Long disciplinaId, LocalDate fecha, Pageable pageable);
     ClaseDetalleDTO getClaseById(Long id);
 }

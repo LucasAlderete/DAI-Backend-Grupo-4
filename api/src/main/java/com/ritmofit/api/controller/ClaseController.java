@@ -17,7 +17,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/clases")
@@ -38,7 +38,7 @@ public class ClaseController {
     public ResponseEntity<Page<ClaseDTO>> getClases(
             @Parameter(description = "ID de la sede para filtrar las clases") @RequestParam(required = false) Long sedeId,
             @Parameter(description = "ID de la disciplina para filtrar las clases") @RequestParam(required = false) Long disciplinaId,
-            @Parameter(description = "Fecha para filtrar las clases (formato ISO: yyyy-MM-dd'T'HH:mm:ss)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fecha,
+            @Parameter(description = "Fecha para filtrar las clases (formato ISO: yyyy-MM-dd')") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
             @Parameter(description = "Paginación y orden de los resultados") Pageable pageable) {
         Page<ClaseDTO> clases = claseService.getClases(sedeId, disciplinaId, fecha, pageable);
         return ResponseEntity.ok(clases);

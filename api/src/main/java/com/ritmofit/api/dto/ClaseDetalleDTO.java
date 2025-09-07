@@ -20,5 +20,4 @@ public class ClaseDetalleDTO {
     private int cupoDisponible;
     private String nombreInstructor;
     private SedeDTO sede;
-    private String direccionSede;
 }

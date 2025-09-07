@@ -11,7 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Service
 public class ClaseServiceImpl implements IClaseService {
@@ -20,7 +20,7 @@ public class ClaseServiceImpl implements IClaseService {
     private ClaseRepository claseRepository;
 
     @Override
-    public Page<ClaseDTO> getClases(Long sedeId, Long disciplinaId, LocalDateTime fecha, Pageable pageable) {
+    public Page<ClaseDTO> getClases(Long sedeId, Long disciplinaId, LocalDate fecha, Pageable pageable) {
         Page<Clase> clases = claseRepository.findByFilters(sedeId, disciplinaId, fecha, pageable);
         return clases.map(this::mapToClaseDTO);
     }
@@ -56,6 +56,7 @@ public class ClaseServiceImpl implements IClaseService {
         SedeDTO sedeDTO = SedeDTO.builder()
                 .id(clase.getSede().getId())
                 .nombre(clase.getSede().getNombre())
+                .direccion(clase.getSede().getDireccion())
                 .build();
 
         DisciplinaDTO disciplinaDTO = DisciplinaDTO.builder()
@@ -71,7 +72,6 @@ public class ClaseServiceImpl implements IClaseService {
                 .cupoDisponible(clase.getCupoDisponible())
                 .nombreInstructor(clase.getInstructor().getNombre())
                 .sede(sedeDTO)
-                .direccionSede(clase.getSede().getDireccion())
                 .build();
     }
 }
