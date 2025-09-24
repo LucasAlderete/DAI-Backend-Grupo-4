@@ -2,7 +2,7 @@ package com.ritmofit.api.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "reservas")
@@ -17,12 +17,25 @@ public class Reserva {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //atributos temporales hasta modelar bien las otras entidades
-    private String clase;
-    private String disciplina;
-    private String horario;
-    private String profesor;
-    private String sede;
-    private Date fecha;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "clase_id", nullable = false)
+    private Clase clase;
+
+    @Column(name = "fecha_reserva", nullable = false)
+    private LocalDateTime fechaReserva;
+
+    @Column(name = "estado", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private EstadoReserva estado;
+
+    @Column(name = "fecha_cancelacion")
+    private LocalDateTime fechaCancelacion;
+
+    public enum EstadoReserva {
+        CONFIRMADA, CANCELADA, EXPIRADA, ASISTIDA
+    }
 }

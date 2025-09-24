@@ -1,18 +1,22 @@
 package com.ritmofit.api.dto;
 
+import com.ritmofit.api.model.entity.Reserva;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
-@Getter @Setter
+@Getter 
+@Setter
+@Builder
 public class ReservaDto {
     private Long id;
-    private String clase;
-    private String disciplina;
-    private String horario;
-    private String profesor;
-    private String sede;
-    private Date fecha;
+    private Long usuarioId;
+    private Long claseId;
+    private ClaseDto clase;
+    private LocalDateTime fechaReserva;
+    private Reserva.EstadoReserva estado;
+    private LocalDateTime fechaCancelacion;
 }
 
