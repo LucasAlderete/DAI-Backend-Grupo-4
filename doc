@@ -1,0 +1,42 @@
+Documentación: Filtros de Fecha en Historial
+
+  ¿Qué hace?
+
+  Permite filtrar el historial de asistencias por rango de fechas
+  (desde-hasta) directamente desde la pantalla de Historial.
+
+  ¿Cómo funciona?
+
+  1. UI: Sección expandible con calendario para seleccionar fechas
+  2. Lógica: Al aplicar filtros, llama al backend con parámetros de fecha
+  3. Resultado: Muestra solo las asistencias del período seleccionado
+
+  Implementación:
+
+  - Layout: fragment_booking_history.xml - Filtros integrados en
+  MaterialCardView colapsable
+  - Lógica: BookingHistoryFragment.java - DatePickers y llamadas API
+  filtradas
+  - API: HistorialApiService.java - Endpoint con parámetros fechaInicio,
+  fechaFin
+  - Datos: HistorialRepositoryImpl.java - Maneja llamadas filtradas vs. sin
+  filtros
+
+  Flujo:
+
+  1. Usuario toca "📅 Filtrar por fechas" → se expande
+  2. Selecciona fechas inicio/fin con DatePickers
+  3. Toca "Aplicar" → API call con filtros
+  4. Lista se actualiza con resultados filtrados
+  5. "Limpiar" → vuelve a mostrar todos los datos
+
+  ---
+
+    
+    -- TO DO --
+  Token Hardcodeado:
+
+  Ubicación: AuthInterceptor.java:15
+  .addHeader("Authorization", "Bearer " + "eyJhbGciOiJIUzI1NiJ9...")
+
+  
