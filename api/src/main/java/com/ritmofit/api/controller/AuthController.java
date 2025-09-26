@@ -30,8 +30,15 @@ public class AuthController {
         @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     public ResponseEntity<AuthResponseDto> solicitarCodigo(@Valid @RequestBody AuthRequestDto request) {
-        AuthResponseDto response = authService.solicitarCodigo(request);
-        return ResponseEntity.ok(response);
+        try {
+            AuthResponseDto response = authService.solicitarCodigo(request);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException ex) {
+            AuthResponseDto response = AuthResponseDto.builder()
+                    .mensaje(ex.getMessage())
+                    .build();
+            return ResponseEntity.status(400).body(response);
+        }
     }
 
     @PostMapping("/verificar-codigo")
@@ -43,8 +50,15 @@ public class AuthController {
         @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     public ResponseEntity<AuthResponseDto> verificarCodigo(@Valid @RequestBody VerifyOtpDto request) {
-        AuthResponseDto response = authService.verificarCodigo(request);
-        return ResponseEntity.ok(response);
+        try {
+            AuthResponseDto response = authService.verificarCodigo(request);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException ex) {
+            AuthResponseDto response = AuthResponseDto.builder()
+                    .mensaje(ex.getMessage()) // resumido: "Código inválido o expirado"
+                    .build();
+            return ResponseEntity.status(400).body(response);
+        }
     }
 
     @PostMapping("/reenviar-codigo")
@@ -56,7 +70,14 @@ public class AuthController {
         @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     public ResponseEntity<AuthResponseDto> reenviarCodigo(@Valid @RequestBody AuthRequestDto request) {
-        AuthResponseDto response = authService.reenviarCodigo(request);
-        return ResponseEntity.ok(response);
+        try {
+            AuthResponseDto response = authService.reenviarCodigo(request);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException ex) {
+            AuthResponseDto response = AuthResponseDto.builder()
+                    .mensaje(ex.getMessage())
+                    .build();
+            return ResponseEntity.status(400).body(response);
+        }
     }
 }
