@@ -17,6 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+
 @RestController
 @RequestMapping("/api/asistencias")
 @RequiredArgsConstructor
@@ -44,10 +47,17 @@ public class AsistenciaController {
         String emailUsuario = authentication.getName();
         
         AsistenciaFilterDto filtros = new AsistenciaFilterDto();
-        // TODO: Parsear fechas si se proporcionan
         filtros.setPage(page);
         filtros.setSize(size);
-        
+        // Parsear fechas si se proporcionan
+        if (fechaInicio != null && fechaFin != null) {
+            try {
+                filtros.setFechaInicio(LocalDateTime.parse(fechaInicio));
+                filtros.setFechaFin(LocalDateTime.parse(fechaFin));
+            } catch (DateTimeParseException e) {
+                return ResponseEntity.badRequest().build(); // Respuesta 400 si las fechas no son válidas
+            }
+        }
         Page<AsistenciaDto> historial = asistenciaService.obtenerHistorialAsistencias(emailUsuario, filtros);
         return ResponseEntity.ok(historial);
     }
