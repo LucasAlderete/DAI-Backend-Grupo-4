@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import com.ritmofit.api.dto.UsuarioDtoUpdate;
 
 @RestController
 @RequestMapping("/api/usuario")
@@ -41,9 +42,9 @@ public class UsuarioController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<UsuarioDto> actualizarPerfil(
             Authentication authentication,
-            @Valid @RequestBody UsuarioDto usuarioDto) {
+            @Valid @RequestBody UsuarioDtoUpdate usuarioDtoUpdate) {
         String email = authentication.getName();
-        UsuarioDto perfilActualizado = usuarioService.actualizarPerfil(email, usuarioDto);
+        UsuarioDto perfilActualizado = usuarioService.actualizarPerfil(email, usuarioDtoUpdate);
         return ResponseEntity.ok(perfilActualizado);
     }
 
