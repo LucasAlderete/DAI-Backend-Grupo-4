@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui.html", "/swagger-ui/index.html").permitAll()
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/uploads/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
