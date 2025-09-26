@@ -12,6 +12,7 @@ public class AuthResponseDto {
     private String token;
     private String email;
     private String nombre;
+    private String password;
     private String fotoUrl;
     private boolean nuevoUsuario;
     private String mensaje;

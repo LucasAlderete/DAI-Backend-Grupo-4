@@ -4,6 +4,8 @@ import com.ritmofit.api.dto.UsuarioDto;
 import com.ritmofit.api.model.entity.Usuario;
 import com.ritmofit.api.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,8 @@ import java.time.LocalDateTime;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
+
 
     public UsuarioDto obtenerPerfil(String email) {
         Usuario usuario = usuarioRepository.findByEmail(email)
@@ -39,24 +43,27 @@ public class UsuarioService {
     }
 
     public UsuarioDto registrarUsuario(UsuarioDto usuarioDto) {
-        if (usuarioRepository.existsByEmail(usuarioDto.getEmail().toLowerCase())) {
-            throw new RuntimeException("Usuario ya registrado");
-        }
-
-        Usuario usuario = Usuario.builder()
-                .nombre(usuarioDto.getNombre())
-                .email(usuarioDto.getEmail().toLowerCase())
-                .fotoUrl(usuarioDto.getFotoUrl())
-                .activo(true)
-                .emailVerificado(true)
-                .fechaRegistro(LocalDateTime.now())
-                .ultimoAcceso(LocalDateTime.now())
-                .build();
-
-        usuario = usuarioRepository.save(usuario);
-
-        return mapToDto(usuario);
+    if (usuarioRepository.existsByEmail(usuarioDto.getEmail().toLowerCase())) {
+        throw new RuntimeException("Usuario ya registrado");
     }
+
+    Usuario usuario = Usuario.builder()
+            .nombre(usuarioDto.getNombre())
+            .email(usuarioDto.getEmail().toLowerCase())
+            .password(passwordEncoder.encode(usuarioDto.getPassword())) // ✅ encriptar
+            .fotoUrl(usuarioDto.getFotoUrl())
+            .activo(true)
+            .emailVerificado(false) // recién verificado al validar OTP
+            .fechaRegistro(LocalDateTime.now())
+            .ultimoAcceso(LocalDateTime.now())
+            .build();
+
+    usuario = usuarioRepository.save(usuario);
+
+    // enviar OTP de validación email acá si querés
+    return mapToDto(usuario);
+}
+
 
     private UsuarioDto mapToDto(Usuario usuario) {
         return UsuarioDto.builder()

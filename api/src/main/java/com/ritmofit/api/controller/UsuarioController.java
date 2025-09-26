@@ -73,7 +73,7 @@ public class UsuarioController {
         @ApiResponse(responseCode = "400", description = "Código OTP inválido o expirado")
     })
     public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto authRequest) {
-        AuthResponseDto response = authService.solicitarCodigo(authRequest);
+        AuthResponseDto response = authService.reenviarCodigo(authRequest);
         return ResponseEntity.ok(response);
     }
 }
