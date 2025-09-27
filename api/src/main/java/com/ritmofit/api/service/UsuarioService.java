@@ -15,8 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.UUID;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +28,6 @@ public class UsuarioService {
 
     private static final String DEFAULT_IMAGE_URL = "/images/default-profile.png";
     private static final String UPLOAD_DIR = "uploads/";
-
 
     public UsuarioDto obtenerPerfil(String email) {
         Usuario usuario = usuarioRepository.findByEmail(email)
@@ -50,14 +49,6 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-usuario.setNombre(usuarioDtoUpdate.getNombre());
-        usuario = usuarioRepository.save(usuario);
-
-        String fotoUrl = (usuario.getFotoUrl() == null || usuario.getFotoUrl().isEmpty())
-                ? DEFAULT_IMAGE_URL
-                : usuario.getFotoUrl();
-
-        // Actualizamos solo los campos que no sean null
         if (usuarioDtoUpdate.getNombre() != null) {
             usuario.setNombre(usuarioDtoUpdate.getNombre());
         }
@@ -114,7 +105,6 @@ usuario.setNombre(usuarioDtoUpdate.getNombre());
                 .build();
     }
 
-
     public String actualizarImagenPerfil(String email, MultipartFile imagen) {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -124,12 +114,21 @@ usuario.setNombre(usuarioDtoUpdate.getNombre());
         }
 
         try {
+            // Crear carpeta uploads si no existe
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // Generar nombre único para el archivo
             String nombreArchivo = UUID.randomUUID() + "_" + imagen.getOriginalFilename();
-            Path ruta = Paths.get(UPLOAD_DIR + nombreArchivo);
-            Files.createDirectories(ruta.getParent());
+            Path ruta = uploadPath.resolve(nombreArchivo);
+
+            // Guardar la imagen en el filesystem
             Files.copy(imagen.getInputStream(), ruta, StandardCopyOption.REPLACE_EXISTING);
 
-            String urlImagen = "/" + UPLOAD_DIR + nombreArchivo;
+            // URL accesible (Spring servirá /uploads/**)
+            String urlImagen = "/uploads/" + nombreArchivo;
 
             usuario.setFotoUrl(urlImagen);
             usuarioRepository.save(usuario);
@@ -139,6 +138,4 @@ usuario.setNombre(usuarioDtoUpdate.getNombre());
             throw new RuntimeException("Error al guardar la imagen", e);
         }
     }
-
-
 }

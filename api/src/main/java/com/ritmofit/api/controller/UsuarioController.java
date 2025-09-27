@@ -52,11 +52,8 @@ public class UsuarioController {
     }
 
     @PutMapping(value = "/perfil/imagen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(
-            summary = "Actualizar imagen de perfil",
-            description = "Permite subir o actualizar la imagen de perfil del usuario",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
+    @Operation(summary = "Actualizar imagen de perfil", description = "Permite subir o actualizar la imagen de perfil del usuario")
+    @SecurityRequirement(name = "bearerAuth")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Imagen actualizada exitosamente",
                     content = @Content(schema = @Schema(implementation = UsuarioDto.class))),
@@ -67,9 +64,8 @@ public class UsuarioController {
             Authentication authentication,
             @RequestParam("imagen") MultipartFile imagen) {
         String email = authentication.getName();
-        String urlImagen = usuarioService.actualizarImagenPerfil(email, imagen);
+        usuarioService.actualizarImagenPerfil(email, imagen);
         UsuarioDto usuarioActualizado = usuarioService.obtenerPerfil(email);
-        usuarioActualizado.setFotoUrl(urlImagen);
         return ResponseEntity.ok(usuarioActualizado);
     }
 
