@@ -76,4 +76,13 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
+    // ======================================
+    // NUEVO MÉTODO: VALIDAR TOKEN SIMPLE
+    // ======================================
+    public void validateToken(String token) {
+        // Lanza excepciones si el token no es válido o expiró
+        extractAllClaims(token);
+    }
 }
+

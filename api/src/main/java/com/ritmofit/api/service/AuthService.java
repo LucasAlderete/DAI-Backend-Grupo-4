@@ -141,4 +141,14 @@ public class AuthService {
                 .mensaje("Código enviado a tu email")
                 .build();
     }
+
+    public boolean validarToken(String token) {
+        try {
+            jwtService.validateToken(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
+
