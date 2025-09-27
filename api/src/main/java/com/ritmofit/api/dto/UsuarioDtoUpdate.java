@@ -7,13 +7,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class AuthResponseDto {
-    
-    private String token;
-    private String email;
+public class UsuarioDtoUpdate {
+
     private String nombre;
+    private String email;
     private String password;
     private String fotoUrl;
-    private boolean nuevoUsuario;
-    private String mensaje;
 }

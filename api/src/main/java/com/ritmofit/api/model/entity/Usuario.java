@@ -24,6 +24,9 @@ public class Usuario {
     @Column(nullable = false)
     private String nombre;
 
+    @Column(nullable = false)
+    private String password;
+
     @Column(name = "foto_url")
     private String fotoUrl;
 

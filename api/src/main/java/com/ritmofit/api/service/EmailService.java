@@ -21,13 +21,13 @@ public class EmailService {
         message.setTo(email);
         message.setSubject("Código de verificación - RitmoFit");
         message.setText(String.format(
-            "Tu código de verificación es: %s\n\n" +
-            "Este código expira en 10 minutos.\n\n" +
-            "Si no solicitaste este código, ignora este mensaje.\n\n" +
-            "¡Gracias por usar RitmoFit!",
-            codigo
+                "Tu código de verificación es: %s\n\n" +
+                "Este código expira en 10 minutos.\n\n" +
+                "Si no solicitaste este código, ignora este mensaje.\n\n" +
+                "¡Gracias por usar RitmoFit!",
+                codigo
         ));
-        
+
         mailSender.send(message);
         System.out.println("✅ Email enviado exitosamente a: " + email);
     }

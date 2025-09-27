@@ -6,15 +6,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @Builder
-public class UsuarioDto {
-    
-    private Long id;
-
+public class RegisterRequestDto {
     @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
 
@@ -24,12 +19,4 @@ public class UsuarioDto {
 
     @NotBlank(message = "La contraseña es obligatoria")
     private String password;
-
-    private String fotoUrl;
-
-    // Campos opcionales para exponer
-    private Boolean activo;
-    private Boolean emailVerificado;
-    private LocalDateTime fechaRegistro;
-    private LocalDateTime ultimoAcceso;
 }

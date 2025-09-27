@@ -16,47 +16,88 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@Tag(name = "Autenticación", description = "API para autenticación de usuarios con OTP")
+@Tag(name = "Autenticación", description = "API para login con contraseña y verificación de email con OTP")
 public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/solicitar-codigo")
-    @Operation(summary = "Solicitar código OTP", description = "Envía un código de verificación al email del usuario")
+    // ======================================
+    // LOGIN (email + password, sin OTP)
+    // ======================================
+    @PostMapping("/login")
+    @Operation(summary = "Login con contraseña", description = "Inicia sesión con email y contraseña")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Código enviado exitosamente",
-                    content = @Content(schema = @Schema(implementation = AuthResponseDto.class))),
-        @ApiResponse(responseCode = "400", description = "Datos inválidos"),
-        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        @ApiResponse(responseCode = "200", description = "Inicio de sesión exitoso",
+                content = @Content(schema = @Schema(implementation = AuthResponseDto.class))),
+        @ApiResponse(responseCode = "400", description = "Credenciales inválidas o email no verificado")
     })
-    public ResponseEntity<AuthResponseDto> solicitarCodigo(@Valid @RequestBody AuthRequestDto request) {
-        AuthResponseDto response = authService.solicitarCodigo(request);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody AuthRequestDto request) {
+        try {
+            return ResponseEntity.ok(authService.login(request));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(400).body(
+                    AuthResponseDto.builder().mensaje(ex.getMessage()).build()
+            );
+        }
     }
 
-    @PostMapping("/verificar-codigo")
-    @Operation(summary = "Verificar código OTP", description = "Verifica el código OTP y autentica al usuario")
+    // ======================================
+    // REGISTER (con OTP para verificar email)
+    // ======================================
+    @PostMapping("/register")
+    @Operation(summary = "Registro de usuario", description = "Registra un usuario con email y contraseña, y envía OTP al correo")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Autenticación exitosa",
-                    content = @Content(schema = @Schema(implementation = AuthResponseDto.class))),
-        @ApiResponse(responseCode = "400", description = "Código inválido o expirado"),
-        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        @ApiResponse(responseCode = "200", description = "Usuario registrado, OTP enviado",
+                content = @Content(schema = @Schema(implementation = AuthResponseDto.class))),
+        @ApiResponse(responseCode = "400", description = "Email ya registrado")
+    })
+    public ResponseEntity<AuthResponseDto> register(@Valid @RequestBody RegisterRequestDto request) {
+        try {
+            return ResponseEntity.ok(authService.register(request));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(400).body(
+                    AuthResponseDto.builder().mensaje(ex.getMessage()).build()
+            );
+        }
+    }
+
+    // ======================================
+    // VERIFICAR CÓDIGO (activar email)
+    // ======================================
+    @PostMapping("/verificar-codigo")
+    @Operation(summary = "Verificar código OTP", description = "Verifica el código OTP y activa el email del usuario")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Email verificado",
+                content = @Content(schema = @Schema(implementation = AuthResponseDto.class))),
+        @ApiResponse(responseCode = "400", description = "Código inválido o expirado")
     })
     public ResponseEntity<AuthResponseDto> verificarCodigo(@Valid @RequestBody VerifyOtpDto request) {
-        AuthResponseDto response = authService.verificarCodigo(request);
-        return ResponseEntity.ok(response);
+        try {
+            return ResponseEntity.ok(authService.verificarCodigo(request));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(400).body(
+                    AuthResponseDto.builder().mensaje(ex.getMessage()).build()
+            );
+        }
     }
 
+    // ======================================
+    // REENVIAR CÓDIGO
+    // ======================================
     @PostMapping("/reenviar-codigo")
-    @Operation(summary = "Reenviar código OTP", description = "Reenvía un nuevo código de verificación al email del usuario")
+    @Operation(summary = "Reenviar código OTP", description = "Reenvía un nuevo OTP para verificación de email")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Código reenviado exitosamente",
-                    content = @Content(schema = @Schema(implementation = AuthResponseDto.class))),
-        @ApiResponse(responseCode = "400", description = "Usuario no encontrado"),
-        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        @ApiResponse(responseCode = "200", description = "OTP reenviado exitosamente",
+                content = @Content(schema = @Schema(implementation = AuthResponseDto.class))),
+        @ApiResponse(responseCode = "400", description = "Usuario no encontrado")
     })
     public ResponseEntity<AuthResponseDto> reenviarCodigo(@Valid @RequestBody AuthRequestDto request) {
-        AuthResponseDto response = authService.reenviarCodigo(request);
-        return ResponseEntity.ok(response);
+        try {
+            return ResponseEntity.ok(authService.reenviarCodigo(request));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(400).body(
+                    AuthResponseDto.builder().mensaje(ex.getMessage()).build()
+            );
+        }
     }
 }
