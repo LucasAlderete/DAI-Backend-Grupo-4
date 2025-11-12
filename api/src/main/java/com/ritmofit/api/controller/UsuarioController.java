@@ -69,10 +69,7 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioActualizado);
     }
 
-
-    // ======================================
-    // REGISTER
-    // ======================================
+    // Register
     @PostMapping("/register")
     @Operation(summary = "Registrar usuario", description = "Registra un nuevo usuario en la aplicación")
     @ApiResponses(value = {
@@ -85,9 +82,7 @@ public class UsuarioController {
         return ResponseEntity.ok(nuevoUsuario);
     }
 
-    // ======================================
-    // LOGIN
-    // ======================================
+    // Login
     @PostMapping("/login")
     @Operation(summary = "Login usuario", description = "Inicia sesión con email usando OTP")
     @ApiResponses(value = {

@@ -44,7 +44,6 @@ public class ClaseController {
         ClaseFilterDto filtros = new ClaseFilterDto();
         filtros.setSedeId(sedeId);
         filtros.setDisciplinaId(disciplinaId);
-        // TODO: Parsear fechas si se proporcionan
         filtros.setPage(page);
         filtros.setSize(size);
         

@@ -1,5 +1,6 @@
 package com.ritmofit.api.controller;
 
+import java.util.Map;
 import com.ritmofit.api.dto.*;
 import com.ritmofit.api.service.AuthService;
 import com.ritmofit.api.service.JwtService;
@@ -154,4 +155,44 @@ public class AuthController {
             );
         }
     }
+
+    // ======================================
+    // ENVIAR OTP SIN PASSWORD (solo email)
+    // ======================================
+    @PostMapping("/enviar-otp")
+    @Operation(summary = "Enviar OTP sin autenticación", description = "Envía un nuevo OTP a un email registrado sin requerir contraseña")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "OTP enviado exitosamente",
+                content = @Content(schema = @Schema(implementation = AuthResponseDto.class))),
+        @ApiResponse(responseCode = "400", description = "Email no encontrado o error en el envío")
+    })
+    public ResponseEntity<AuthResponseDto> enviarOtpSinPassword(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            if (email == null || email.isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(AuthResponseDto.builder().mensaje("Debe ingresar un email").build());
+            }
+
+            return ResponseEntity.ok(authService.enviarOtpSinPassword(email));
+
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(400).body(
+                    AuthResponseDto.builder().mensaje(ex.getMessage()).build()
+            );
+        }
+    }
+
+    @PostMapping("/reenviar-codigo-email")
+public ResponseEntity<AuthResponseDto> reenviarCodigoPorEmail(@RequestBody Map<String, String> request) {
+    String email = request.get("email");
+    if (email == null || email.isEmpty()) {
+        throw new RuntimeException("El email es obligatorio");
+    }
+
+    AuthResponseDto response = authService.enviarOtpSinPassword(email);
+    return ResponseEntity.ok(response);
+}
+
+
 }

@@ -42,13 +42,11 @@ public class AsistenciaService {
         Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // Verificar que no existe ya una asistencia para esta clase
         Asistencia asistenciaExistente = asistenciaRepository.findByUsuarioAndClase(usuario, claseId);
         if (asistenciaExistente != null) {
             throw new RuntimeException("Ya existe una asistencia registrada para esta clase");
         }
 
-        // Crear la asistencia
         Asistencia asistencia = Asistencia.builder()
                 .usuario(usuario)
                 .clase(Clase.builder().id(claseId).build())
@@ -69,18 +67,15 @@ public class AsistenciaService {
         Asistencia asistencia = asistenciaRepository.findById(asistenciaId)
                 .orElseThrow(() -> new RuntimeException("Asistencia no encontrada"));
 
-        // Verificar que la asistencia pertenece al usuario
         if (!asistencia.getUsuario().getId().equals(usuario.getId())) {
             throw new RuntimeException("No tienes permisos para calificar esta asistencia");
         }
 
-        // Verificar que la asistencia es reciente (dentro de las últimas 24 horas)
         LocalDateTime limiteCalificacion = asistencia.getFechaAsistencia().plusHours(24);
         if (LocalDateTime.now().isAfter(limiteCalificacion)) {
             throw new RuntimeException("El tiempo para calificar esta asistencia ha expirado");
         }
 
-        // Actualizar la calificación
         asistencia.setCalificacion(calificacionDto.getCalificacion());
         asistencia.setComentario(calificacionDto.getComentario());
         asistencia.setFechaCalificacion(LocalDateTime.now());
@@ -103,7 +98,6 @@ public class AsistenciaService {
 
         Page<AsistenciaDto> asistencias = obtenerHistorialAsistencias(emailUsuario, filtros);
         
-        // Filtrar solo las que no tienen calificación
         return asistencias.map(asistencia -> {
             if (asistencia.getCalificacion() == null) {
                 return asistencia;

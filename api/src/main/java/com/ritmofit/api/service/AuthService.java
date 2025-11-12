@@ -149,6 +149,35 @@ public class AuthService {
         } catch (Exception e) {
             return false;
         }
-    }
+    }    
+
+    public AuthResponseDto enviarOtpSinPassword(String email) {
+    Usuario usuario = usuarioRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    otpTokenRepository.deleteByEmail(email);
+
+    String codigo = String.format("%06d", random.nextInt(1_000_000));
+
+    OtpToken otpToken = OtpToken.builder()
+            .email(email)
+            .codigo(codigo)
+            .fechaCreacion(LocalDateTime.now())
+            .fechaExpiracion(LocalDateTime.now().plusMinutes(10))
+            .usado(false)
+            .tipo(OtpToken.TipoOtp.LOGIN)
+            .build();
+
+    otpTokenRepository.save(otpToken);
+
+    emailService.enviarCodigoOtp(email, codigo);
+
+    return AuthResponseDto.builder()
+            .email(email)
+            .mensaje("Código enviado al correo " + email)
+            .build();
+}
+
+
 }
 
