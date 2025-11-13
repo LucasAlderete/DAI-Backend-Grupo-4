@@ -126,11 +126,44 @@ public class AsistenciaService {
                 .id(clase.getId())
                 .nombre(clase.getNombre())
                 .descripcion(clase.getDescripcion())
+                .disciplina(convertirADisciplinaDto(clase.getDisciplina()))
+                .instructor(convertirAInstructorDto(clase.getInstructor()))
+                .sede(convertirASedeDto(clase.getSede()))
                 .fechaInicio(clase.getFechaInicio())
                 .fechaFin(clase.getFechaFin())
                 .cupoMaximo(clase.getCupoMaximo())
                 .cupoActual(clase.getCupoActual())
                 .disponible(clase.getCupoActual() < clase.getCupoMaximo())
+                .build();
+    }
+
+    private SedeDto convertirASedeDto(Sede sede) {
+        if (sede == null) return null;
+        return SedeDto.builder()
+                .id(sede.getId())
+                .nombre(sede.getNombre())
+                .direccion(sede.getDireccion())
+                .telefono(sede.getTelefono())
+                .build();
+    }
+
+    private DisciplinaDto convertirADisciplinaDto(Disciplina disciplina) {
+        if (disciplina == null) return null;
+        return DisciplinaDto.builder()
+                .id(disciplina.getId())
+                .nombre(disciplina.getNombre())
+                .descripcion(disciplina.getDescripcion())
+                .build();
+    }
+
+    private InstructorDto convertirAInstructorDto(Instructor instructor) {
+        if (instructor == null) return null;
+        return InstructorDto.builder()
+                .id(instructor.getId())
+                .nombre(instructor.getNombre())
+                .apellido(instructor.getApellido())
+                .email(instructor.getEmail())
+                .telefono(instructor.getTelefono())
                 .build();
     }
 }
