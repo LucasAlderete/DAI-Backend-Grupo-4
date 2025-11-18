@@ -1,0 +1,17 @@
+package com.ritmofit.api.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class DisciplinaUsuarioDto {
+    private Long id;
+    private Long disciplinaId;
+    private Long usuarioId;
+    private String disciplinaNombre;
+}
