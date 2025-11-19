@@ -4,6 +4,7 @@ import com.ritmofit.api.model.entity.*;
 import com.ritmofit.api.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -16,12 +17,64 @@ public class DataLoader implements CommandLineRunner {
     private final SedeRepository sedeRepository;
     private final InstructorRepository instructorRepository;
     private final ClaseRepository claseRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final AsistenciaRepository asistenciaRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
         // Solo cargar datos si no existen
         if (disciplinaRepository.count() == 0) {
             cargarDatosIniciales();
+        }
+        
+        // Siempre intentar crear datos de prueba para calificaciones
+        // (solo si el usuario existe o se puede crear)
+        crearUsuarioPrueba();
+        Usuario usuarioPrueba = usuarioRepository.findByEmail("lucasm.alderete@gmail.com").orElse(null);
+        if (usuarioPrueba != null) {
+            // Verificar si el usuario ya tiene asistencias recientes sin calificar
+            LocalDateTime fechaMinima = LocalDateTime.now().minusHours(24);
+            long asistenciasRecientes = asistenciaRepository.findAll().stream()
+                    .filter(a -> a.getUsuario().getId().equals(usuarioPrueba.getId()))
+                    .filter(a -> a.getFechaCheckin().isAfter(fechaMinima))
+                    .filter(a -> a.getCalificacion() == null)
+                    .count();
+            
+            if (asistenciasRecientes == 0) {
+                // Solo crear asistencias si no tiene ninguna reciente sin calificar
+                Disciplina yoga = disciplinaRepository.findAll().stream()
+                        .filter(d -> "Yoga".equals(d.getNombre())).findFirst().orElse(null);
+                Disciplina pilates = disciplinaRepository.findAll().stream()
+                        .filter(d -> "Pilates".equals(d.getNombre())).findFirst().orElse(null);
+                Disciplina crossfit = disciplinaRepository.findAll().stream()
+                        .filter(d -> "CrossFit".equals(d.getNombre())).findFirst().orElse(null);
+                Disciplina spinning = disciplinaRepository.findAll().stream()
+                        .filter(d -> "Spinning".equals(d.getNombre())).findFirst().orElse(null);
+                
+                Instructor maria = instructorRepository.findAll().stream()
+                        .filter(i -> "María".equals(i.getNombre())).findFirst().orElse(null);
+                Instructor carlos = instructorRepository.findAll().stream()
+                        .filter(i -> "Carlos".equals(i.getNombre())).findFirst().orElse(null);
+                Instructor diego = instructorRepository.findAll().stream()
+                        .filter(i -> "Diego".equals(i.getNombre())).findFirst().orElse(null);
+                Instructor ana = instructorRepository.findAll().stream()
+                        .filter(i -> "Ana".equals(i.getNombre())).findFirst().orElse(null);
+                
+                Sede sedeCentro = sedeRepository.findAll().stream()
+                        .filter(s -> "RitmoFit Centro".equals(s.getNombre())).findFirst().orElse(null);
+                Sede sedePalermo = sedeRepository.findAll().stream()
+                        .filter(s -> "RitmoFit Palermo".equals(s.getNombre())).findFirst().orElse(null);
+                Sede sedeRecoleta = sedeRepository.findAll().stream()
+                        .filter(s -> "RitmoFit Recoleta".equals(s.getNombre())).findFirst().orElse(null);
+                
+                if (yoga != null && pilates != null && crossfit != null && spinning != null &&
+                    maria != null && carlos != null && diego != null && ana != null &&
+                    sedeCentro != null && sedePalermo != null && sedeRecoleta != null) {
+                    crearDatosCalificacion(yoga, pilates, crossfit, spinning, maria, carlos, diego, ana, 
+                                         sedeCentro, sedePalermo, sedeRecoleta);
+                }
+            }
         }
     }
 
@@ -217,5 +270,151 @@ public class DataLoader implements CommandLineRunner {
         claseRepository.save(claseSpinningTarde);
         claseRepository.save(claseZumbaManana);
         claseRepository.save(claseYogaTarde);
+    }
+
+    private void crearUsuarioPrueba() {
+        String emailPrueba = "lucasm.alderete@gmail.com";
+        
+        // Solo crear si no existe
+        if (!usuarioRepository.existsByEmail(emailPrueba)) {
+            Usuario usuarioPrueba = Usuario.builder()
+                    .email(emailPrueba)
+                    .nombre("Lucas Alderete")
+                    .password(passwordEncoder.encode("River"))
+                    .fechaRegistro(LocalDateTime.now().minusDays(30))
+                    .ultimoAcceso(LocalDateTime.now())
+                    .activo(true)
+                    .emailVerificado(true) // Ya verificado para poder hacer login
+                    .build();
+            
+            usuarioRepository.save(usuarioPrueba);
+        }
+    }
+
+    private void crearDatosCalificacion(Disciplina yoga, Disciplina pilates, Disciplina crossfit, 
+                                        Disciplina spinning, Instructor maria, Instructor carlos, 
+                                        Instructor diego, Instructor ana, Sede sedeCentro, 
+                                        Sede sedePalermo, Sede sedeRecoleta) {
+        
+        LocalDateTime ahora = LocalDateTime.now();
+        Usuario usuarioPrueba = usuarioRepository.findByEmail("lucasm.alderete@gmail.com").orElse(null);
+        
+        if (usuarioPrueba == null) {
+            return; // Si no existe el usuario, no crear datos
+        }
+
+        // Crear clases pasadas (hace algunas horas) para poder tener asistencias
+        Clase claseYogaPasada = Clase.builder()
+                .nombre("Yoga Matutino - Pasada")
+                .descripcion("Clase de yoga que ya ocurrió")
+                .disciplina(yoga)
+                .instructor(maria)
+                .sede(sedeCentro)
+                .fechaInicio(ahora.minusHours(3))
+                .fechaFin(ahora.minusHours(2))
+                .cupoMaximo(20)
+                .cupoActual(15)
+                .activo(true)
+                .build();
+
+        Clase clasePilatesPasada = Clase.builder()
+                .nombre("Pilates Core - Pasada")
+                .descripcion("Clase de pilates que ya ocurrió")
+                .disciplina(pilates)
+                .instructor(carlos)
+                .sede(sedePalermo)
+                .fechaInicio(ahora.minusHours(6))
+                .fechaFin(ahora.minusHours(5))
+                .cupoMaximo(15)
+                .cupoActual(12)
+                .activo(true)
+                .build();
+
+        Clase claseCrossfitPasada = Clase.builder()
+                .nombre("CrossFit Intenso - Pasada")
+                .descripcion("Clase de crossfit que ya ocurrió")
+                .disciplina(crossfit)
+                .instructor(diego)
+                .sede(sedeCentro)
+                .fechaInicio(ahora.minusHours(12))
+                .fechaFin(ahora.minusHours(11))
+                .cupoMaximo(12)
+                .cupoActual(10)
+                .activo(true)
+                .build();
+
+        Clase claseSpinningPasada = Clase.builder()
+                .nombre("Spinning Power - Pasada")
+                .descripcion("Clase de spinning que ya ocurrió")
+                .disciplina(spinning)
+                .instructor(ana)
+                .sede(sedeRecoleta)
+                .fechaInicio(ahora.minusHours(18))
+                .fechaFin(ahora.minusHours(17))
+                .cupoMaximo(25)
+                .cupoActual(20)
+                .activo(true)
+                .build();
+
+        // Guardar clases pasadas
+        claseYogaPasada = claseRepository.save(claseYogaPasada);
+        clasePilatesPasada = claseRepository.save(clasePilatesPasada);
+        claseCrossfitPasada = claseRepository.save(claseCrossfitPasada);
+        claseSpinningPasada = claseRepository.save(claseSpinningPasada);
+
+        // Crear asistencias recientes (dentro de las últimas 24 horas) SIN calificación
+        // Asistencia hace 2 horas (aún calificable)
+        Asistencia asistencia1 = Asistencia.builder()
+                .usuario(usuarioPrueba)
+                .clase(claseYogaPasada)
+                .fechaAsistencia(ahora.minusHours(3))
+                .fechaCheckin(ahora.minusHours(3))
+                .duracionMinutos(60)
+                .calificacion(null) // Sin calificar
+                .comentario(null)
+                .fechaCalificacion(null)
+                .build();
+
+        // Asistencia hace 5 horas (aún calificable)
+        Asistencia asistencia2 = Asistencia.builder()
+                .usuario(usuarioPrueba)
+                .clase(clasePilatesPasada)
+                .fechaAsistencia(ahora.minusHours(6))
+                .fechaCheckin(ahora.minusHours(6))
+                .duracionMinutos(60)
+                .calificacion(null) // Sin calificar
+                .comentario(null)
+                .fechaCalificacion(null)
+                .build();
+
+        // Asistencia hace 11 horas (aún calificable)
+        Asistencia asistencia3 = Asistencia.builder()
+                .usuario(usuarioPrueba)
+                .clase(claseCrossfitPasada)
+                .fechaAsistencia(ahora.minusHours(12))
+                .fechaCheckin(ahora.minusHours(12))
+                .duracionMinutos(60)
+                .calificacion(null) // Sin calificar
+                .comentario(null)
+                .fechaCalificacion(null)
+                .build();
+
+        // Asistencia hace 17 horas (aún calificable, cerca del límite)
+        Asistencia asistencia4 = Asistencia.builder()
+                .usuario(usuarioPrueba)
+                .clase(claseSpinningPasada)
+                .fechaAsistencia(ahora.minusHours(18))
+                .fechaCheckin(ahora.minusHours(18))
+                .duracionMinutos(60)
+                .calificacion(null) // Sin calificar
+                .comentario(null)
+                .fechaCalificacion(null)
+                .build();
+
+        // Guardar asistencias
+        asistenciaRepository.save(asistencia1);
+        asistenciaRepository.save(asistencia2);
+        asistenciaRepository.save(asistencia3);
+        asistenciaRepository.save(asistencia4);
     }
 }

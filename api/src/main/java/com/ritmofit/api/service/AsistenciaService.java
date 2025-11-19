@@ -71,9 +71,15 @@ public class AsistenciaService {
             throw new RuntimeException("No tienes permisos para calificar esta asistencia");
         }
 
-        LocalDateTime limiteCalificacion = asistencia.getFechaAsistencia().plusHours(24);
+        // Validar que no se haya calificado previamente
+        if (asistencia.getCalificacion() != null) {
+            throw new RuntimeException("Esta asistencia ya ha sido calificada");
+        }
+
+        // Validar que esté dentro de las 24 horas desde el check-in
+        LocalDateTime limiteCalificacion = asistencia.getFechaCheckin().plusHours(24);
         if (LocalDateTime.now().isAfter(limiteCalificacion)) {
-            throw new RuntimeException("El tiempo para calificar esta asistencia ha expirado");
+            throw new RuntimeException("El tiempo para calificar esta asistencia ha expirado (debe ser dentro de las 24 horas posteriores al check-in)");
         }
 
         asistencia.setCalificacion(calificacionDto.getCalificacion());
@@ -89,21 +95,23 @@ public class AsistenciaService {
         Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        LocalDateTime limiteCalificacion = LocalDateTime.now().minusHours(24);
+        LocalDateTime ahora = LocalDateTime.now();
+        // Calcular la fecha mínima: hace 24 horas desde ahora
+        LocalDateTime fechaMinima = ahora.minusHours(24);
+        // La fecha máxima es ahora (solo asistencias que aún pueden calificarse)
+        LocalDateTime fechaMaxima = ahora;
         
-        AsistenciaFilterDto filtros = new AsistenciaFilterDto();
-        filtros.setFechaInicio(limiteCalificacion);
-        filtros.setPage(page);
-        filtros.setSize(size);
-
-        Page<AsistenciaDto> asistencias = obtenerHistorialAsistencias(emailUsuario, filtros);
+        Pageable pageable = PageRequest.of(page, size);
         
-        return asistencias.map(asistencia -> {
-            if (asistencia.getCalificacion() == null) {
-                return asistencia;
-            }
-            return null;
-        });
+        // Usar el método del repositorio que filtra por fechaCheckin dentro de las últimas 24 horas y sin calificación
+        Page<Asistencia> asistencias = asistenciaRepository.findAsistenciasCalificables(
+                usuario, 
+                fechaMinima,
+                fechaMaxima,
+                pageable);
+        
+        // Convertir a DTO (la consulta ya filtra correctamente, así que todas deberían ser válidas)
+        return asistencias.map(this::convertirAAsistenciaDto);
     }
 
     private AsistenciaDto convertirAAsistenciaDto(Asistencia asistencia) {

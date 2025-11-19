@@ -26,4 +26,15 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
     
     @Query("SELECT a FROM Asistencia a WHERE a.usuario = :usuario AND a.clase.id = :claseId")
     Asistencia findByUsuarioAndClase(@Param("usuario") Usuario usuario, @Param("claseId") Long claseId);
+    
+    @Query("SELECT a FROM Asistencia a WHERE a.usuario = :usuario " +
+           "AND a.fechaCheckin >= :fechaMinima " +
+           "AND a.fechaCheckin <= :fechaMaxima " +
+           "AND a.calificacion IS NULL " +
+           "ORDER BY a.fechaCheckin DESC")
+    Page<Asistencia> findAsistenciasCalificables(
+            @Param("usuario") Usuario usuario,
+            @Param("fechaMinima") LocalDateTime fechaMinima,
+            @Param("fechaMaxima") LocalDateTime fechaMaxima,
+            Pageable pageable);
 }
