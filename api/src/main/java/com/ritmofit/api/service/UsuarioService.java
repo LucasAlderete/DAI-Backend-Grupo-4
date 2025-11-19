@@ -26,7 +26,7 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
 
-    private static final String DEFAULT_IMAGE_URL = "/images/default-profile.png";
+    private static final String DEFAULT_IMAGE_URL = "/uploads/default-profile.jpg";
     private static final String UPLOAD_DIR = "uploads/";
 
     public UsuarioDto obtenerPerfil(String email) {

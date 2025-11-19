@@ -14,7 +14,12 @@ import java.time.LocalDateTime;
 @Repository
 public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
     
-    @Query("SELECT a FROM Asistencia a WHERE a.usuario = :usuario " +
+    @Query("SELECT a FROM Asistencia a " +
+           "JOIN FETCH a.clase c " +
+           "LEFT JOIN FETCH c.sede " +
+           "LEFT JOIN FETCH c.disciplina " +
+           "LEFT JOIN FETCH c.instructor " +
+           "WHERE a.usuario = :usuario " +
            "AND (:fechaInicio IS NULL OR a.fechaAsistencia >= :fechaInicio) " +
            "AND (:fechaFin IS NULL OR a.fechaAsistencia <= :fechaFin) " +
            "ORDER BY a.fechaAsistencia DESC")
