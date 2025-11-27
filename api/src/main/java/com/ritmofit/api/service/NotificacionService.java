@@ -10,8 +10,6 @@ import com.ritmofit.api.repository.NotificacionRepository;
 import com.ritmofit.api.repository.ReservaRepository;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Optional;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,8 +25,9 @@ public class NotificacionService {
     private final ReservaRepository reservaRepository;
 
     public List<NotificacionDto> obtenerPendientes(Long usuarioId) {
-        List<Notificacion> pendientes = notificacionRepository.findPendientesConClaseCargada(usuarioId);
-        pendientes.forEach(n -> n.setEnviada(true));
+        LocalDateTime ahora = LocalDateTime.now();
+        List<Notificacion> pendientes = notificacionRepository.findPendientesConClaseCargada(usuarioId, ahora);
+        pendientes.forEach(n -> n.setEnviada(true)); // solo se marca enviada si ya pasó la fecha
         notificacionRepository.saveAll(pendientes);
         return pendientes.stream().map(NotificacionMapper::toDto).toList();
     }
@@ -114,32 +113,15 @@ public class NotificacionService {
     private void actualizarRecordatorioDe1Hora(Reserva reserva, Clase clase) {
         LocalDateTime nuevaFecha = clase.getFechaInicio().minusHours(1);
 
-        Optional<Notificacion> anteriorOpt =
-                notificacionRepository.findByClaseIdAndTipoAndUsuarioId(
-                        clase.getId(),
-                        "RECORDATORIO",
-                        reserva.getUsuario().getId()
-                );
+        Notificacion n = Notificacion.builder()
+                .clase(clase)
+                .usuarioId(reserva.getUsuario().getId())
+                .tipo("RECORDATORIO")
+                .mensaje("Tu clase " + clase.getNombre() + " comienza en 1 hora.")
+                .fechaEnvio(nuevaFecha)
+                .enviada(false)
+                .build();
 
-        Notificacion anterior = anteriorOpt.orElse(null);
-
-        if (anterior == null) {
-            Notificacion n = Notificacion.builder()
-                    .clase(clase)
-                    .usuarioId(reserva.getUsuario().getId())
-                    .tipo("RECORDATORIO")
-                    .mensaje("Tu clase " + clase.getNombre() + " comienza en 1 hora.")
-                    .fechaEnvio(nuevaFecha)
-                    .enviada(false)
-                    .build();
-
-            notificacionRepository.save(n);
-            return;
-        }
-
-        if (!anterior.getFechaEnvio().equals(nuevaFecha)) {
-            anterior.setFechaEnvio(nuevaFecha);
-            notificacionRepository.save(anterior);
-        }
+        notificacionRepository.save(n);
     }
 }

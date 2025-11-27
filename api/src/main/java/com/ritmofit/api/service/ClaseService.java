@@ -23,9 +23,6 @@ public class ClaseService {
     private final InstructorRepository instructorRepository;
     private final NotificacionService notificacionService;
 
-    // ----------------------------------------------------------
-    // ✔ MÉTODO QUE FALTABA Y ROMPÍA EL CONTROLLER
-    // ----------------------------------------------------------
     public Page<ClaseDto> obtenerClasesConFiltros(ClaseFilterDto filtros) {
         Pageable pageable = PageRequest.of(filtros.getPage(), filtros.getSize());
         Page<Clase> clases = claseRepository.findClasesWithFilters(
@@ -38,7 +35,6 @@ public class ClaseService {
         return clases.map(this::convertirAClaseDto);
     }
 
-    // ✔ Otro método que el controller pedía
     public ClaseDto obtenerClasePorId(Long id) {
         Clase clase = claseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Clase no encontrada"));
@@ -60,16 +56,12 @@ public class ClaseService {
                 .stream().map(this::convertirAInstructorDto).toList();
     }
 
-    // ----------------------------------------------------------
-    // ✔ ACTUALIZAR CLASE (incluye CANCELADA y REPROGRAMADA)
-    // ----------------------------------------------------------
     @Transactional
     public Clase actualizarClase(Long id, Clase claseNueva) {
 
         Clase antes = claseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Clase no encontrada"));
 
-        // Copia para comparar después
         Clase original = new Clase();
         original.setFechaInicio(antes.getFechaInicio());
         original.setFechaFin(antes.getFechaFin());
@@ -80,10 +72,8 @@ public class ClaseService {
         original.setDescripcion(antes.getDescripcion());
         original.setActivo(antes.isActivo());
 
-        // ✔ Detectamos cancelación
         boolean cancelada = antes.isActivo() && !claseNueva.isActivo();
 
-        // Aplicamos cambios
         antes.setActivo(claseNueva.isActivo());
         antes.setNombre(claseNueva.getNombre());
         antes.setDescripcion(claseNueva.getDescripcion());
@@ -97,13 +87,11 @@ public class ClaseService {
 
         Clase despues = claseRepository.save(antes);
 
-        // ✔ CANCELADA → Notificación y fin
         if (cancelada) {
             notificacionService.generarNotificacionCancelada(despues);
             return despues;
         }
 
-        // ✔ Detectar cambios relevantes → REPROGRAMADA
         boolean reprogramada =
                 !original.getFechaInicio().equals(despues.getFechaInicio()) ||
                 !original.getFechaFin().equals(despues.getFechaFin()) ||
@@ -120,9 +108,6 @@ public class ClaseService {
         return despues;
     }
 
-    // ----------------------------------------------------------
-    // ✔ DTO MAPPERS
-    // ----------------------------------------------------------
     private ClaseDto convertirAClaseDto(Clase clase) {
         return ClaseDto.builder()
                 .id(clase.getId())
@@ -136,7 +121,7 @@ public class ClaseService {
                 .cupoMaximo(clase.getCupoMaximo())
                 .cupoActual(clase.getCupoActual())
                 .disponible(clase.getCupoActual() < clase.getCupoMaximo())
-                .activo(clase.isActivo()) // ← Asegurate que ClaseDto tiene este campo
+                .activo(clase.isActivo()) 
                 .build();
     }
 

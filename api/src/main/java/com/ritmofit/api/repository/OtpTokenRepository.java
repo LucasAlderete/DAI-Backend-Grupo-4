@@ -41,6 +41,5 @@ public interface OtpTokenRepository extends JpaRepository<OtpToken, Long> {
 
     void deleteByEmailAndUsadoTrue(String email);
 
-    // ✅ Nuevo: elimina todos los tokens asociados a un email
     void deleteByEmail(String email);
 }

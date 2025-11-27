@@ -12,12 +12,11 @@ import java.util.Optional;
 public interface NotificacionRepository extends JpaRepository<Notificacion, Long> {
 
     @Query("SELECT n FROM Notificacion n " +
-           "JOIN FETCH n.clase c " +
-           "WHERE n.usuarioId = :usuarioId " +
-           "AND n.enviada = false")
-    List<Notificacion> findPendientesConClaseCargada(
-            @Param("usuarioId") Long usuarioId
-    );
+       "JOIN FETCH n.clase c " +
+       "WHERE n.usuarioId = :usuarioId " +
+       "AND n.enviada = false " +
+       "AND n.fechaEnvio <= :ahora")
+     List<Notificacion> findPendientesConClaseCargada(@Param("usuarioId") Long usuarioId,@Param("ahora") LocalDateTime ahora);
 
     List<Notificacion> findByUsuarioIdAndEnviadaFalseAndFechaEnvioBefore(
             Long usuarioId,
