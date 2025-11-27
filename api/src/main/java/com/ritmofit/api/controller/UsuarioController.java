@@ -43,12 +43,25 @@ public class UsuarioController {
     @PutMapping("/perfil")
     @Operation(summary = "Actualizar perfil", description = "Actualiza el perfil del usuario autenticado")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<UsuarioDto> actualizarPerfil(
+    public ResponseEntity<AuthResponseDto> actualizarPerfil(
             Authentication authentication,
             @Valid @RequestBody UsuarioDtoUpdate usuarioDtoUpdate) {
+
         String email = authentication.getName();
         UsuarioDto perfilActualizado = usuarioService.actualizarPerfil(email, usuarioDtoUpdate);
-        return ResponseEntity.ok(perfilActualizado);
+
+        // generar nuevo JWT
+        String nuevoToken = authService.generarToken(perfilActualizado);
+
+        AuthResponseDto response = AuthResponseDto.builder()
+                .token(nuevoToken)
+                .email(perfilActualizado.getEmail())
+                .nombre(perfilActualizado.getNombre())
+                .fotoUrl(perfilActualizado.getFotoUrl())
+                .mensaje("Perfil actualizado correctamente")
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping(value = "/perfil/imagen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

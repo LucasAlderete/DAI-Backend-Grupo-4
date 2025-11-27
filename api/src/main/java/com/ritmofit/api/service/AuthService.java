@@ -180,6 +180,10 @@ public class AuthService {
             .build();
 }
 
+    public String generarToken(UsuarioDto usuarioDto) {
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(usuarioDto.getEmail());
+        return jwtService.generateToken(userDetails);
+    }
 
 }
 
