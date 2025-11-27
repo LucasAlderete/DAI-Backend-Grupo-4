@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 public class ClaseDto {
-    
+
     private Long id;
     private String nombre;
     private String descripcion;
@@ -22,4 +22,5 @@ public class ClaseDto {
     private Integer cupoMaximo;
     private Integer cupoActual;
     private Boolean disponible;
+    private Boolean activo;
 }

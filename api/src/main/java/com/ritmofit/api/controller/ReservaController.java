@@ -98,4 +98,19 @@ public class ReservaController {
         List<ReservaDto> reservas = reservaService.obtenerProximasReservas(emailUsuario);
         return ResponseEntity.ok(reservas);
     }
+
+    
+    @GetMapping("/clase/{claseId}")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<ReservaDto> obtenerReservaPorClase(
+            Authentication authentication,
+            @PathVariable Long claseId) {
+
+        String emailUsuario = authentication.getName();
+      
+
+        ReservaDto reserva = reservaService.obtenerReservaPorClase(emailUsuario, claseId);
+        return ResponseEntity.ok(reserva);
+    }
+
 }

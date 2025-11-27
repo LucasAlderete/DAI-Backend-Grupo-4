@@ -28,9 +28,7 @@ public class AuthController {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
-    // ======================================
     // LOGIN (email + password, sin OTP)
-    // ======================================
     @PostMapping("/login")
     @Operation(summary = "Login con contraseña", description = "Inicia sesión con email y contraseña")
     @ApiResponses(value = {
@@ -48,9 +46,7 @@ public class AuthController {
         }
     }
 
-    // ======================================
     // REGISTER (con OTP para verificar email)
-    // ======================================
     @PostMapping("/register")
     @Operation(summary = "Registro de usuario", description = "Registra un usuario con email y contraseña, y envía OTP al correo")
     @ApiResponses(value = {
@@ -68,9 +64,7 @@ public class AuthController {
         }
     }
 
-    // ======================================
     // VERIFICAR CÓDIGO (activar email)
-    // ======================================
     @PostMapping("/verificar-codigo")
     @Operation(summary = "Verificar código OTP", description = "Verifica el código OTP y activa el email del usuario")
     @ApiResponses(value = {
@@ -88,9 +82,7 @@ public class AuthController {
         }
     }
 
-    // ======================================
     // REENVIAR CÓDIGO
-    // ======================================
     @PostMapping("/reenviar-codigo")
     @Operation(summary = "Reenviar código OTP", description = "Reenvía un nuevo OTP para verificación de email")
     @ApiResponses(value = {
@@ -108,9 +100,7 @@ public class AuthController {
         }
     }
 
-    // ======================================
     // VALIDAR TOKEN JWT
-    // ======================================
     @GetMapping("/validate")
     @Operation(summary = "Validar token JWT", description = "Verifica si el token JWT es válido")
     @ApiResponses(value = {
@@ -156,9 +146,7 @@ public class AuthController {
         }
     }
 
-    // ======================================
     // ENVIAR OTP SIN PASSWORD (solo email)
-    // ======================================
     @PostMapping("/enviar-otp")
     @Operation(summary = "Enviar OTP sin autenticación", description = "Envía un nuevo OTP a un email registrado sin requerir contraseña")
     @ApiResponses(value = {

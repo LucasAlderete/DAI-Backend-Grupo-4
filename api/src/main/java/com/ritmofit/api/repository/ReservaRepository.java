@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface ReservaRespository extends JpaRepository<Reserva, Long> {
+public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     
     @Query("SELECT r FROM Reserva r WHERE r.usuario = :usuario ORDER BY r.clase.fechaInicio DESC")
     Page<Reserva> findByUsuarioOrderByFechaInicioDesc(@Param("usuario") Usuario usuario, Pageable pageable);
@@ -24,4 +24,13 @@ public interface ReservaRespository extends JpaRepository<Reserva, Long> {
     
     @Query("SELECT COUNT(r) FROM Reserva r WHERE r.clase.id = :claseId AND r.estado = 'CONFIRMADA'")
     Long countReservasActivasPorClase(@Param("claseId") Long claseId);
+
+    @Query("SELECT r FROM Reserva r WHERE r.clase.id = :claseId AND r.estado = :estado")
+    List<Reserva> findByClaseIdAndEstado(@Param("claseId") Long claseId,@Param("estado") Reserva.EstadoReserva estado);
+    
+    @Query("SELECT r FROM Reserva r " +"WHERE r.estado = 'CONFIRMADA' " +"AND r.clase.fechaInicio BETWEEN :desde AND :hasta")
+    List<Reserva> findByClaseFechaInicioBetween(@Param("desde") LocalDateTime desde,@Param("hasta") LocalDateTime hasta);
+    
+    @Query("SELECT r FROM Reserva r WHERE r.usuario.id = :userId AND r.clase.id = :claseId AND r.estado = 'CONFIRMADA'")
+    Reserva findByUsuarioIdAndClaseId(@Param("userId") Long userId, @Param("claseId") Long claseId);
 }

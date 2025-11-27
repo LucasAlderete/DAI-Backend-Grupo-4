@@ -3,7 +3,7 @@ package com.ritmofit.api.service;
 import com.ritmofit.api.dto.*;
 import com.ritmofit.api.model.entity.*;
 import com.ritmofit.api.repository.ClaseRepository;
-import com.ritmofit.api.repository.ReservaRespository;
+import com.ritmofit.api.repository.ReservaRepository;
 import com.ritmofit.api.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class ReservaService implements IReservaService {
 
-    private final ReservaRespository reservaRepository;
+    private final ReservaRepository reservaRepository;
     private final UsuarioRepository usuarioRepository;
     private final ClaseRepository claseRepository;
 
@@ -31,37 +31,30 @@ public class ReservaService implements IReservaService {
 
     @Override
     public Reserva create(ReservaDto nuevaReserva) {
-        // Este método se mantiene por compatibilidad, pero se recomienda usar crearReserva
         throw new UnsupportedOperationException("Use crearReserva(CrearReservaDto, String) instead");
     }
 
     public ReservaDto crearReserva(CrearReservaDto crearReservaDto, String emailUsuario) {
-        // Validar que el usuario existe
         Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // Validar que la clase existe
         Clase clase = claseRepository.findById(crearReservaDto.getClaseId())
                 .orElseThrow(() -> new RuntimeException("Clase no encontrada"));
 
-        // Validar que la clase no ha comenzado
         if (clase.getFechaInicio().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("No se puede reservar una clase que ya ha comenzado");
         }
 
-        // Validar que no hay cupo disponible
         Long reservasActivas = reservaRepository.countReservasActivasPorClase(clase.getId());
         if (reservasActivas >= clase.getCupoMaximo()) {
             throw new RuntimeException("No hay cupo disponible para esta clase");
         }
 
-        // Validar que el usuario no tiene ya una reserva activa para esta clase
         Reserva reservaExistente = reservaRepository.findReservaActiva(usuario, clase.getId());
         if (reservaExistente != null) {
             throw new RuntimeException("Ya tienes una reserva activa para esta clase");
         }
 
-        // Crear la reserva
         Reserva reserva = Reserva.builder()
                 .usuario(usuario)
                 .clase(clase)
@@ -71,7 +64,6 @@ public class ReservaService implements IReservaService {
 
         reserva = reservaRepository.save(reserva);
 
-        // Actualizar el cupo actual de la clase
         clase.setCupoActual(clase.getCupoActual() + 1);
         claseRepository.save(clase);
 
@@ -85,27 +77,22 @@ public class ReservaService implements IReservaService {
         Reserva reserva = reservaRepository.findById(reservaId)
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
 
-        // Validar que la reserva pertenece al usuario
         if (!reserva.getUsuario().getId().equals(usuario.getId())) {
             throw new RuntimeException("No tienes permisos para cancelar esta reserva");
         }
 
-        // Validar que la reserva está confirmada
         if (reserva.getEstado() != Reserva.EstadoReserva.CONFIRMADA) {
             throw new RuntimeException("Solo se pueden cancelar reservas confirmadas");
         }
 
-        // Validar que la clase no ha comenzado
         if (reserva.getClase().getFechaInicio().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("No se puede cancelar una reserva de una clase que ya ha comenzado");
         }
 
-        // Cancelar la reserva
         reserva.setEstado(Reserva.EstadoReserva.CANCELADA);
         reserva.setFechaCancelacion(LocalDateTime.now());
         reserva = reservaRepository.save(reserva);
 
-        // Actualizar el cupo actual de la clase
         Clase clase = reserva.getClase();
         clase.setCupoActual(clase.getCupoActual() - 1);
         claseRepository.save(clase);
@@ -186,5 +173,18 @@ public class ReservaService implements IReservaService {
                 .direccion(sede.getDireccion())
                 .telefono(sede.getTelefono())
                 .build();
+    }
+
+    public ReservaDto obtenerReservaPorClase(String emailUsuario, Long claseId) {
+        Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Reserva reserva = reservaRepository.findByUsuarioIdAndClaseId(usuario.getId(), claseId);
+
+        if (reserva == null) {
+            throw new RuntimeException("No tienes reserva para esta clase");
+        }
+
+        return convertirAReservaDto(reserva);
     }
 }

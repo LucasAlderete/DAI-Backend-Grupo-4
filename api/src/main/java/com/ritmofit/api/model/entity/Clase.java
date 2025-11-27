@@ -51,5 +51,9 @@ public class Clase {
 
     @Column(name = "activo", nullable = false)
     @Builder.Default
-    private Boolean activo = true;
+    private boolean activo = true;
+
+    public boolean isActivo() {
+        return activo;
+    }
 }

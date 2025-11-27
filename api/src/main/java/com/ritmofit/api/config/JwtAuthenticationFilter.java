@@ -32,7 +32,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         
         final String authHeader = request.getHeader("Authorization");
         
-        // Only process JWT if Authorization header is present and starts with "Bearer "
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -56,7 +55,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            // Log the error but don't block the request
             System.err.println("Error processing JWT: " + e.getMessage());
         }
         

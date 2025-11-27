@@ -33,17 +33,20 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .authorizeHttpRequests(authz -> authz
-                        // Permitir endpoints públicos
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/usuario/register").permitAll()
                         .requestMatchers("/api/usuario/login").permitAll()
                         .requestMatchers("/api/clases/**").permitAll()
+                        .requestMatchers("/api/notificaciones/pending/**").permitAll()
+                        .requestMatchers("/api/notificaciones/generar/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/index.html").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
-                        // Todo lo demás requiere autenticación
+                        .requestMatchers("/reservas/**").permitAll()
+                        .requestMatchers("/api/reservas/**").permitAll()
+                        .requestMatchers("/notificaciones/**").permitAll()
                         .anyRequest().authenticated()
                 )
             .sessionManagement(session -> session

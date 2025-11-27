@@ -82,7 +82,7 @@ public class UsuarioService {
                 .password(passwordEncoder.encode(usuarioDto.getPassword()))
                 .fotoUrl(usuarioDto.getFotoUrl())
                 .activo(true)
-                .emailVerificado(false) // recién verificado al validar OTP
+                .emailVerificado(false)
                 .fechaRegistro(LocalDateTime.now())
                 .ultimoAcceso(LocalDateTime.now())
                 .build();
@@ -114,20 +114,17 @@ public class UsuarioService {
         }
 
         try {
-            // Crear carpeta uploads si no existe
             Path uploadPath = Paths.get(UPLOAD_DIR);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
 
-            // Generar nombre único para el archivo
             String nombreArchivo = UUID.randomUUID() + "_" + imagen.getOriginalFilename();
             Path ruta = uploadPath.resolve(nombreArchivo);
 
             // Guardar la imagen en el filesystem
             Files.copy(imagen.getInputStream(), ruta, StandardCopyOption.REPLACE_EXISTING);
 
-            // URL accesible (Spring servirá /uploads/**)
             String urlImagen = "/uploads/" + nombreArchivo;
 
             usuario.setFotoUrl(urlImagen);

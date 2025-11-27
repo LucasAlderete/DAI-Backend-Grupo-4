@@ -26,8 +26,6 @@ public class UsuarioDto {
     private String password;
 
     private String fotoUrl;
-
-    // Campos opcionales para exponer
     private Boolean activo;
     private Boolean emailVerificado;
     private LocalDateTime fechaRegistro;
