@@ -3,6 +3,7 @@ package com.ritmofit.api.service;
 import com.ritmofit.api.dto.*;
 import com.ritmofit.api.model.entity.*;
 import com.ritmofit.api.repository.AsistenciaRepository;
+import com.ritmofit.api.repository.ReservaRepository;
 import com.ritmofit.api.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,7 @@ public class AsistenciaService {
 
     private final AsistenciaRepository asistenciaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final ReservaRepository reservaRepository;
 
     public Page<AsistenciaDto> obtenerHistorialAsistencias(String emailUsuario, AsistenciaFilterDto filtros) {
         Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
@@ -173,5 +175,47 @@ public class AsistenciaService {
                 .email(instructor.getEmail())
                 .telefono(instructor.getTelefono())
                 .build();
+    }
+
+    public AsistenciaDto realizarCheckin(String emailUsuario, Long claseId) {
+        // 1. Buscar usuario por email
+        Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        // 2. Buscar reserva activa (estado CONFIRMADA)
+        Reserva reserva = reservaRepository.findReservaActiva(usuario, claseId);
+        if (reserva == null) {
+            throw new RuntimeException("No tienes una reserva confirmada para esta clase");
+        }
+
+        // 3. Validar horario (15 min antes hasta 5 min después del inicio)
+        LocalDateTime ahora = LocalDateTime.now();
+        LocalDateTime inicioClase = reserva.getClase().getFechaInicio();
+        LocalDateTime limiteAntes = inicioClase.minusMinutes(15);
+        LocalDateTime limiteDespues = inicioClase.plusMinutes(5);
+
+        if (ahora.isBefore(limiteAntes) || ahora.isAfter(limiteDespues)) {
+            throw new RuntimeException("Fuera del horario permitido. Puedes hacer check-in 15 minutos antes del inicio hasta 5 minutos después");
+        }
+
+        // 4. Verificar que no haya check-in previo
+        Asistencia asistenciaExistente = asistenciaRepository.findByUsuarioAndClase(usuario, claseId);
+        if (asistenciaExistente != null) {
+            throw new RuntimeException("Ya realizaste check-in para esta clase");
+        }
+
+        // 5. Crear asistencia
+        Asistencia asistencia = Asistencia.builder()
+                .usuario(usuario)
+                .clase(reserva.getClase())
+                .reserva(reserva)
+                .fechaAsistencia(LocalDateTime.now())
+                .fechaCheckin(LocalDateTime.now())
+                .build();
+
+        asistencia = asistenciaRepository.save(asistencia);
+
+        // 6. Retornar DTO con datos completos
+        return convertirAAsistenciaDto(asistencia);
     }
 }
