@@ -20,12 +20,17 @@ public class DataLoader implements CommandLineRunner {
     private final UsuarioRepository usuarioRepository;
     private final AsistenciaRepository asistenciaRepository;
     private final PasswordEncoder passwordEncoder;
+    private final NewsRepository newsRepository;
 
     @Override
     public void run(String... args) throws Exception {
         // Solo cargar datos si no existen
         if (disciplinaRepository.count() == 0) {
             cargarDatosIniciales();
+        }
+
+        if (newsRepository.count() == 0) {
+            cargarNewsIniciales();
         }
         
         // Siempre intentar crear datos de prueba para calificaciones
@@ -270,6 +275,30 @@ public class DataLoader implements CommandLineRunner {
         claseRepository.save(claseSpinningTarde);
         claseRepository.save(claseZumbaManana);
         claseRepository.save(claseYogaTarde);
+    }
+
+    private void cargarNewsIniciales() {
+        News n1 = News.builder()
+                .titulo("Black Friday: 30% OFF en membresías")
+                .descripcion("Aprovechá el 30% de descuento en planes trimestrales. Solo por esta semana.")
+                .orden(1)
+                .imgUrl("https://example.com/images/black-friday.jpg")
+                .build();
+        News n2 = News.builder()
+                .titulo("Nueva clase de HIIT")
+                .descripcion("Sumamos clases de HIIT los martes y jueves a las 19 hs.")
+                .orden(2)
+                .imgUrl("https://example.com/images/hiit-class.jpg")
+                .build();
+        News n3 = News.builder()
+                .titulo("Evento especial de Zumba")
+                .descripcion("Este sábado, masterclass de Zumba en la sede Palermo. ¡Reservá tu lugar!")
+                .orden(3)
+                .imgUrl("https://example.com/images/zumba-event.jpg")
+                .build();
+        newsRepository.save(n1);
+        newsRepository.save(n2);
+        newsRepository.save(n3);
     }
 
     private void crearUsuarioPrueba() {
