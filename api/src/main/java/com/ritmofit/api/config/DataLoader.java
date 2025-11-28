@@ -282,19 +282,19 @@ public class DataLoader implements CommandLineRunner {
                 .titulo("Black Friday: 30% OFF en membresías")
                 .descripcion("Aprovechá el 30% de descuento en planes trimestrales. Solo por esta semana.")
                 .orden(1)
-                .imgUrl("https://example.com/images/black-friday.jpg")
+                .imgUrl("https://media.istockphoto.com/id/1658502745/vector/black-friday.jpg?s=612x612&w=0&k=20&c=xwIMr3zgpa2AFKIme-oxYcABGqjoILDxDjzHCt3Z33Y=")
                 .build();
         News n2 = News.builder()
-                .titulo("Nueva clase de HIIT")
-                .descripcion("Sumamos clases de HIIT los martes y jueves a las 19 hs.")
+                .titulo("Nueva clase de Yoga")
+                .descripcion("Sumamos clases de Yoga los martes y jueves a las 19 hs.")
                 .orden(2)
-                .imgUrl("https://example.com/images/hiit-class.jpg")
+                .imgUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIqFZozo1io81bgDEt3IVlo9EF1MKbv35yEw&s")
                 .build();
         News n3 = News.builder()
                 .titulo("Evento especial de Zumba")
                 .descripcion("Este sábado, masterclass de Zumba en la sede Palermo. ¡Reservá tu lugar!")
                 .orden(3)
-                .imgUrl("https://example.com/images/zumba-event.jpg")
+                .imgUrl("https://t4.ftcdn.net/jpg/02/41/90/89/360_F_241908982_eJlON17X6EbDhuSUAYOz52VGQQNOy8dT.jpg")
                 .build();
         newsRepository.save(n1);
         newsRepository.save(n2);
