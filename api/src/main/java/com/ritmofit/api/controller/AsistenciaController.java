@@ -116,9 +116,44 @@ public class AsistenciaController {
             Authentication authentication,
             @Parameter(description = "Número de página (base 0)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Tamaño de página") @RequestParam(defaultValue = "20") int size) {
-        
+
         String emailUsuario = authentication.getName();
         Page<AsistenciaDto> asistencias = asistenciaService.obtenerAsistenciasCalificables(emailUsuario, page, size);
         return ResponseEntity.ok(asistencias);
+    }
+
+    @PostMapping("/checkin")
+    @Operation(summary = "Realizar check-in", description = "Realiza el check-in del usuario a una clase mediante escaneo de código QR")
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Check-in exitoso",
+                    content = @Content(schema = @Schema(implementation = AsistenciaDto.class))),
+        @ApiResponse(responseCode = "404", description = "No tienes una reserva confirmada para esta clase"),
+        @ApiResponse(responseCode = "409", description = "Ya realizaste check-in para esta clase"),
+        @ApiResponse(responseCode = "422", description = "Fuera del horario permitido para check-in"),
+        @ApiResponse(responseCode = "401", description = "No autorizado"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    public ResponseEntity<?> realizarCheckin(
+            Authentication authentication,
+            @Valid @RequestBody CheckinRequestDto request) {
+
+        try {
+            String emailUsuario = authentication.getName();
+            AsistenciaDto asistencia = asistenciaService.realizarCheckin(emailUsuario, request.getClaseId());
+            return ResponseEntity.ok(asistencia);
+        } catch (RuntimeException ex) {
+            String mensaje = ex.getMessage();
+
+            if (mensaje.contains("No tienes una reserva confirmada")) {
+                return ResponseEntity.status(404).body(java.util.Map.of("error", mensaje));
+            } else if (mensaje.contains("Ya realizaste check-in")) {
+                return ResponseEntity.status(409).body(java.util.Map.of("error", mensaje));
+            } else if (mensaje.contains("Fuera del horario permitido")) {
+                return ResponseEntity.status(422).body(java.util.Map.of("error", mensaje));
+            } else {
+                return ResponseEntity.status(500).body(java.util.Map.of("error", "Error interno del servidor"));
+            }
+        }
     }
 }
